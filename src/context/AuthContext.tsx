@@ -18,8 +18,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Temporary bypass for development - remove this later
+  const [devMode] = useState(true);
 
   useEffect(() => {
+    if (devMode) {
+      // Temporary dev mode - bypass auth
+      setUser({
+        id: 'dev-user',
+        username: 'devuser',
+        email: 'dev@example.com',
+        created_at: new Date().toISOString(),
+      });
+      setSession({} as any); // Mock session
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -40,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [devMode]);
 
   const fetchUserProfile = async (userId: string) => {
     try {

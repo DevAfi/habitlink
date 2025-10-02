@@ -1,3 +1,4 @@
+// src/screens/SignupScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -8,10 +9,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import { useAuth } from '../context/AuthContext';
+import { theme } from '../utils/theme';
 
 type SignupScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Signup'>;
 
@@ -50,9 +53,9 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert('Signup Failed', error.message);
     } else {
       Alert.alert(
-        'Success',
-        'Account created! You can now log in.',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+        'Welcome! 🎉',
+        'Your account has been created successfully. Let\'s start building habits!',
+        [{ text: 'Get Started', onPress: () => navigation.navigate('Login') }]
       );
     }
   };
@@ -62,66 +65,184 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join HabitLink today</Text>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.logoCircle}>
+              <Text style={styles.logoText}>HL</Text>
+            </View>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join HabitLink and start your journey</Text>
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
+          {/* Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Username</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Choose a unique username"
+                placeholderTextColor={theme.colors.textLight}
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+              />
+            </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="you@example.com"
+                placeholderTextColor={theme.colors.textLight}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password (min 6 characters)"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="At least 6 characters"
+                placeholderTextColor={theme.colors.textLight}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSignup}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? 'Creating account...' : 'Sign Up'}
-          </Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleSignup}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Creating account...' : 'Sign Up'}
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.linkText}>
-            Already have an account? <Text style={styles.linkBold}>Log in</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Login')}
+              style={styles.linkContainer}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.linkText}>
+                Already have an account?{' '}
+                <Text style={styles.linkBold}>Log in</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#10b981', textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#6b7280', textAlign: 'center', marginBottom: 48 },
-  input: { height: 50, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 16, marginBottom: 16, fontSize: 16 },
-  button: { backgroundColor: '#10b981', height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  linkText: { textAlign: 'center', marginTop: 24, color: '#6b7280' },
-  linkBold: { color: '#10b981', fontWeight: '600' },
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.xxl,
+    paddingBottom: theme.spacing.xl,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  logoCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.lg,
+  },
+  logoText: {
+    fontSize: theme.fontSize.xxl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.textOnPrimary,
+  },
+  title: {
+    fontSize: theme.fontSize.xxxl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    fontSize: theme.fontSize.base,
+    color: theme.colors.textLight,
+    textAlign: 'center',
+  },
+  formContainer: {
+    width: '100%',
+  },
+  inputContainer: {
+    marginBottom: theme.spacing.lg,
+  },
+  inputLabel: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
+    marginLeft: theme.spacing.xs,
+  },
+  input: {
+    height: 56,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: theme.spacing.md,
+    fontSize: theme.fontSize.base,
+    color: theme.colors.text,
+    ...theme.shadows.sm,
+  },
+  button: {
+    backgroundColor: theme.colors.primary,
+    height: 56,
+    borderRadius: theme.borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: theme.spacing.md,
+    ...theme.shadows.md,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: theme.colors.textOnPrimary,
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.semibold,
+  },
+  linkContainer: {
+    marginTop: theme.spacing.xl,
+    alignItems: 'center',
+  },
+  linkText: {
+    textAlign: 'center',
+    color: theme.colors.textLight,
+    fontSize: theme.fontSize.base,
+  },
+  linkBold: {
+    color: theme.colors.primary,
+    fontWeight: theme.fontWeight.semibold,
+  },
 });
 
 export default SignupScreen;
