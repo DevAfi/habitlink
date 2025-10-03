@@ -2,43 +2,34 @@
 
 export const theme = {
   colors: {
-    // Modern gradient-based primary colors
-    primary: '#6366f1',        // Indigo
-    primaryLight: '#818cf8',   // Lighter indigo
-    primaryDark: '#4f46e5',    // Darker indigo
-    primaryGradient: ['#6366f1', '#8b5cf6'], // Indigo to purple gradient
+    primary: '#1e3a5f',        // Deep blue
+    primaryLight: '#2d5a8f',   // Lighter blue
+    primaryDark: '#0f1f3d',    // Darker blue
     
-    // Accent colors with modern palette
-    accent: '#f1f5f9',         // Slate 50
-    accentDark: '#e2e8f0',     // Slate 200
-    accentGradient: ['#f1f5f9', '#e2e8f0'], // Subtle gradient
+    accent: '#f4e8d8',         // Cream
+    accentDark: '#e8d5ba',     // Darker cream
     
-    // Background with modern neutral tones
-    background: '#fafbfc',     // Almost white with subtle blue tint
-    backgroundSecondary: '#f8fafc', // Slightly darker background
+    background: '#faf8f5',     // Off-white/cream background
     surface: '#ffffff',        // Pure white for cards
-    surfaceElevated: '#ffffff', // Elevated surfaces
     
-    // Text with better contrast
-    text: '#0f172a',           // Slate 900 - better contrast
-    textSecondary: '#475569',  // Slate 600
-    textLight: '#64748b',      // Slate 500
-    textOnPrimary: '#ffffff',  // White text on primary
+    text: '#1a1a1a',           // Almost black
+    textLight: '#6b7280',      // Gray
+    textSecondary: '#9ca3af',  // Lighter gray
+    textOnPrimary: '#ffffff',  // White text on blue
     
-    // Status colors with modern palette
-    success: '#10b981',        // Emerald 500
-    successLight: '#34d399',   // Emerald 400
-    warning: '#f59e0b',        // Amber 500
-    warningLight: '#fbbf24',   // Amber 400
-    error: '#ef4444',          // Red 500
-    errorLight: '#f87171',     // Red 400
-    info: '#3b82f6',           // Blue 500
+    success: '#10b981',        // Green for completions
+    info: '#3b82f6',           // Blue for info
+    warning: '#f59e0b',        // Amber for streaks
+    error: '#ef4444',          // Red for destructive
     
-    // Borders and shadows
-    border: '#e2e8f0',         // Slate 200
-    borderLight: '#f1f5f9',    // Slate 100
-    shadow: 'rgba(15, 23, 42, 0.08)', // Slate 900 with opacity
-    shadowColored: 'rgba(99, 102, 241, 0.12)', // Indigo shadow
+    border: '#e5e7eb',         // Light gray border
+    borderLight: '#f3f4f6',    // Very light gray
+    shadow: 'rgba(30, 58, 95, 0.1)', // Blue-tinted shadow
+  },
+  
+  gradients: {
+    primary: ['#1e3a5f', '#2d5a8f'],
+    accent: ['#f4e8d8', '#e8d5ba'],
   },
   
   spacing: {
@@ -78,48 +69,25 @@ export const theme = {
   
   shadows: {
     sm: {
-      shadowColor: '#0f172a',
+      shadowColor: '#1e3a5f',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
-      shadowRadius: 3,
+      shadowRadius: 2,
       elevation: 2,
     },
     md: {
-      shadowColor: '#0f172a',
-      shadowOffset: { width: 0, height: 4 },
+      shadowColor: '#1e3a5f',
+      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
-      shadowRadius: 12,
+      shadowRadius: 8,
       elevation: 4,
     },
     lg: {
-      shadowColor: '#0f172a',
-      shadowOffset: { width: 0, height: 8 },
+      shadowColor: '#1e3a5f',
+      shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.12,
-      shadowRadius: 24,
+      shadowRadius: 16,
       elevation: 8,
     },
-    xl: {
-      shadowColor: '#0f172a',
-      shadowOffset: { width: 0, height: 16 },
-      shadowOpacity: 0.15,
-      shadowRadius: 32,
-      elevation: 12,
-    },
-    colored: {
-      shadowColor: '#6366f1',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 12,
-      elevation: 6,
-    },
-  },
-  
-  // Modern gradient definitions
-  gradients: {
-    primary: ['#6366f1', '#8b5cf6'],
-    success: ['#10b981', '#34d399'],
-    warning: ['#f59e0b', '#fbbf24'],
-    error: ['#ef4444', '#f87171'],
-    subtle: ['#f8fafc', '#f1f5f9'],
   },
 };

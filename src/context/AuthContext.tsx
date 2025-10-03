@@ -1,13 +1,18 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from '../services/supabaseClient';
-import { User } from '../types/types';
+// src/context/AuthContext.tsx
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { Session } from "@supabase/supabase-js";
+import { supabase } from "../services/supabaseClient";
+import { User } from "../types/types";
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    username: string
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -18,24 +23,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Temporary bypass for development - remove this later
-  const [devMode] = useState(true);
 
   useEffect(() => {
-    if (devMode) {
-      // Temporary dev mode - bypass auth
-      setUser({
-        id: 'dev-user',
-        username: 'devuser',
-        email: 'dev@example.com',
-        created_at: new Date().toISOString(),
-      });
-      setSession({} as any); // Mock session
-      setLoading(false);
-      return;
-    }
-
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -45,7 +35,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
         fetchUserProfile(session.user.id);
@@ -56,20 +49,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [devMode]);
+  }, []);
 
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
 
-      if (error) throw error;
-      setUser(data);
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log("No profile found for user:", userId);
+        setUser(null);
+      } else {
+        setUser(data);
+      }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error("Error fetching user profile:", error);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -88,6 +91,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) return { error };
+
+      // Profile will be created automatically by trigger
       return { error: null };
     } catch (error) {
       return { error };
@@ -107,7 +112,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ session, user, loading, signUp, signIn, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -116,7 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
