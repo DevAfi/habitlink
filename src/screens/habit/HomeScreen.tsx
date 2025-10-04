@@ -109,7 +109,7 @@ const HomeScreen = () => {
       .order('created_at', { ascending: false });
 
     if (habitsError) {
-      console.error('Error fetching habits:', error);
+      console.error('Error fetching habits:', habitsError);
       setLoading(false);
       setRefreshing(false);
       return;

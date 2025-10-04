@@ -21,6 +21,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
   completedToday,
   currentStreak,
   onToggle,
+  onDelete,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -46,27 +47,37 @@ const HabitCard: React.FC<HabitCardProps> = ({
           )}
         </View>
 
-        <TouchableOpacity
-          style={styles.checkButton}
-          onPress={handleToggle}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {completedToday ? (
-            <LinearGradient
-              colors={theme.gradients.purple}
-              style={styles.checkButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.checkIcon}>✓</Text>
-            </LinearGradient>
-          ) : (
-            <View style={styles.checkButtonEmpty}>
-              <View style={styles.checkButtonInner} />
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={onDelete}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.deleteIcon}>🗑️</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.checkButton}
+            onPress={handleToggle}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {completedToday ? (
+              <LinearGradient
+                colors={theme.gradients.purple as [string, string, ...string[]]}
+                style={styles.checkButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.checkIcon}>✓</Text>
+              </LinearGradient>
+            ) : (
+              <View style={styles.checkButtonEmpty}>
+                <View style={styles.checkButtonInner} />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -89,6 +100,11 @@ const styles = StyleSheet.create({
   habitInfo: {
     flex: 1,
     marginRight: 16,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   habitTitle: {
     fontSize: 18,
@@ -115,6 +131,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: theme.colors.warning,
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  deleteIcon: {
+    fontSize: 16,
   },
   checkButton: {
     width: 56,
