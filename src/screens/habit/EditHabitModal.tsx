@@ -17,6 +17,13 @@ import { theme } from '../../utils/theme';
 import { supabase } from '../../services/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 
+// Habit types with descriptions (same as AddHabitModal)
+const HABIT_TYPES = [
+  { id: 'binary', name: 'Yes/No', icon: '✅', description: 'Simple completion tracking' },
+  { id: 'count', name: 'Count', icon: '🔢', description: 'Track quantities (e.g., 10 push-ups)' },
+  { id: 'time', name: 'Duration', icon: '⏱️', description: 'Track time spent (e.g., 30 min meditation)' },
+];
+
 // Habit categories with icons and colors (same as AddHabitModal)
 const HABIT_CATEGORIES = [
   { id: 'health', name: 'Health & Fitness', icon: '💪', colors: ['#FF6B6B', '#FF8E8E'] },
@@ -36,6 +43,9 @@ interface Habit {
   title: string;
   description: string | null;
   category?: string;
+  habit_type?: string;
+  target_value?: number;
+  target_unit?: string;
   created_at: string;
 }
 
@@ -50,6 +60,9 @@ const EditHabitModal: React.FC<EditHabitModalProps> = ({ visible, habit, onClose
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('other');
+  const [selectedType, setSelectedType] = useState('binary');
+  const [targetValue, setTargetValue] = useState('');
+  const [targetUnit, setTargetUnit] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -59,6 +72,9 @@ const EditHabitModal: React.FC<EditHabitModalProps> = ({ visible, habit, onClose
       setTitle(habit.title);
       setDescription(habit.description || '');
       setSelectedCategory(habit.category || 'other');
+      setSelectedType(habit.habit_type || 'binary');
+      setTargetValue(habit.target_value?.toString() || '');
+      setTargetUnit(habit.target_unit || '');
     }
   }, [habit]);
 
@@ -75,13 +91,26 @@ const EditHabitModal: React.FC<EditHabitModalProps> = ({ visible, habit, onClose
 
     setLoading(true);
 
+    const habitData: any = {
+      title: title.trim(),
+      description: description.trim() || null,
+      category: selectedCategory,
+      habit_type: selectedType,
+    };
+
+    // Add target data based on habit type
+    if (selectedType === 'count' || selectedType === 'time') {
+      if (!targetValue.trim()) {
+        Alert.alert('Error', 'Please enter a target value');
+        return;
+      }
+      habitData.target_value = parseFloat(targetValue);
+      habitData.target_unit = targetUnit.trim() || (selectedType === 'count' ? 'times' : 'minutes');
+    }
+
     const { error } = await supabase
       .from('habits')
-      .update({
-        title: title.trim(),
-        description: description.trim() || null,
-        category: selectedCategory,
-      })
+      .update(habitData)
       .eq('id', habit.id)
       .eq('user_id', user.id);
 
@@ -101,6 +130,9 @@ const EditHabitModal: React.FC<EditHabitModalProps> = ({ visible, habit, onClose
     setTitle('');
     setDescription('');
     setSelectedCategory('other');
+    setSelectedType('binary');
+    setTargetValue('');
+    setTargetUnit('');
     onClose();
   };
 
@@ -240,6 +272,80 @@ const EditHabitModal: React.FC<EditHabitModalProps> = ({ visible, habit, onClose
                   ))}
                 </ScrollView>
               </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Habit Type</Text>
+                <View style={styles.typeContainer}>
+                  {HABIT_TYPES.map((type) => (
+                    <TouchableOpacity
+                      key={type.id}
+                      style={[
+                        styles.typeItem,
+                        selectedType === type.id && styles.typeItemSelected
+                      ]}
+                      onPress={() => {
+                        setSelectedType(type.id);
+                        setTargetValue('');
+                        setTargetUnit('');
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.typeContent}>
+                        <Text style={styles.typeIcon}>{type.icon}</Text>
+                        <View style={styles.typeInfo}>
+                          <Text style={[
+                            styles.typeName,
+                            selectedType === type.id && styles.typeNameSelected
+                          ]}>
+                            {type.name}
+                          </Text>
+                          <Text style={[
+                            styles.typeDescription,
+                            selectedType === type.id && styles.typeDescriptionSelected
+                          ]}>
+                            {type.description}
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {(selectedType === 'count' || selectedType === 'time') && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Target</Text>
+                  <View style={styles.targetContainer}>
+                    <View style={styles.targetInputWrapper}>
+                      <TextInput
+                        style={styles.targetInput}
+                        placeholder="10"
+                        placeholderTextColor={theme.colors.textSecondary}
+                        value={targetValue}
+                        onChangeText={setTargetValue}
+                        keyboardType="numeric"
+                        maxLength={10}
+                      />
+                    </View>
+                    <View style={styles.targetUnitWrapper}>
+                      <TextInput
+                        style={styles.targetUnitInput}
+                        placeholder={selectedType === 'count' ? 'times' : 'minutes'}
+                        placeholderTextColor={theme.colors.textSecondary}
+                        value={targetUnit}
+                        onChangeText={setTargetUnit}
+                        maxLength={20}
+                      />
+                    </View>
+                  </View>
+                  <Text style={styles.targetHint}>
+                    {selectedType === 'count' 
+                      ? 'e.g., "10 push-ups" or "5 glasses of water"'
+                      : 'e.g., "30 minutes" or "1 hour"'
+                    }
+                  </Text>
+                </View>
+              )}
 
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -441,6 +547,86 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     fontSize: 16,
     fontWeight: '600',
+  },
+  typeContainer: {
+    marginTop: 8,
+    gap: 8,
+  },
+  typeItem: {
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    padding: 16,
+  },
+  typeItemSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.surface,
+  },
+  typeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  typeIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  typeInfo: {
+    flex: 1,
+  },
+  typeName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.text,
+    marginBottom: 2,
+  },
+  typeNameSelected: {
+    color: theme.colors.primary,
+  },
+  typeDescription: {
+    fontSize: 12,
+    color: theme.colors.textLight,
+  },
+  typeDescriptionSelected: {
+    color: theme.colors.textSecondary,
+  },
+  targetContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  targetInputWrapper: {
+    flex: 1,
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  targetInput: {
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: theme.colors.text,
+    textAlign: 'center',
+  },
+  targetUnitWrapper: {
+    flex: 2,
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  targetUnitInput: {
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: theme.colors.text,
+  },
+  targetHint: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 });
 

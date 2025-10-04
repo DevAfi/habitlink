@@ -26,12 +26,16 @@ interface Habit {
   title: string;
   description: string | null;
   category?: string;
+  habit_type?: string;
+  target_value?: number;
+  target_unit?: string;
   created_at: string;
 }
 
 interface HabitWithStats extends Habit {
   completedToday: boolean;
   currentStreak: number;
+  todayProgress?: number;
 }
 
 const HomeScreen = () => {
@@ -119,25 +123,28 @@ const HomeScreen = () => {
       return;
     }
 
-    // Fetch today's completions
+    // Fetch today's completions and progress
     const today = new Date().toISOString().split('T')[0];
     const { data: completionsData } = await supabase
       .from('completions')
-      .select('habit_id, completed_at')
+      .select('habit_id, completed_at, progress_value')
       .eq('user_id', user.id)
       .gte('completed_at', today)
       .lte('completed_at', today);
 
-    // Calculate streaks for each habit
+    // Calculate streaks and progress for each habit
     const habitsWithStats = await Promise.all(
       (habitsData || []).map(async (habit) => {
-        const completedToday = completionsData?.some(c => c.habit_id === habit.id) || false;
+        const todayCompletion = completionsData?.find(c => c.habit_id === habit.id);
+        const completedToday = !!todayCompletion;
+        const todayProgress = todayCompletion?.progress_value || 0;
         const streak = await calculateStreak(habit.id);
         
         return {
           ...habit,
           completedToday,
           currentStreak: streak,
+          todayProgress,
         };
       })
     );
@@ -215,6 +222,50 @@ const HomeScreen = () => {
     }
 
     fetchHabits();
+  };
+
+  const updateHabitProgress = async (habitId: string, progress: number) => {
+    if (!user) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const habit = habits.find(h => h.id === habitId);
+    
+    if (!habit) return;
+
+    // Check if habit is completed based on progress vs target
+    const isCompleted = habit.habit_type === 'binary' 
+      ? progress > 0 
+      : (habit.target_value ? progress >= habit.target_value : progress > 0);
+
+    try {
+      // First, remove any existing completion for today
+      await supabase
+        .from('completions')
+        .delete()
+        .eq('habit_id', habitId)
+        .eq('completed_at', today);
+
+      // Add new completion with progress value
+      const { error } = await supabase
+        .from('completions')
+        .insert({
+          habit_id: habitId,
+          user_id: user.id,
+          completed_at: today,
+          progress_value: progress,
+        });
+
+      if (error) {
+        Alert.alert('Error', 'Failed to update progress');
+        console.error('Error updating progress:', error);
+        return;
+      }
+
+      fetchHabits();
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      Alert.alert('Error', 'Failed to update progress');
+    }
   };
 
   const deleteHabit = async (habitId: string, habitTitle: string) => {
@@ -385,9 +436,11 @@ const HomeScreen = () => {
                     habit={habit}
                     completedToday={habit.completedToday}
                     currentStreak={habit.currentStreak}
+                    todayProgress={habit.todayProgress}
                     onToggle={() => toggleHabit(habit.id, habit.completedToday)}
                     onDelete={() => deleteHabit(habit.id, habit.title)}
                     onEdit={() => editHabit(habit)}
+                    onProgressUpdate={(progress) => updateHabitProgress(habit.id, progress)}
                   />
                 </Animated.View>
               ))}

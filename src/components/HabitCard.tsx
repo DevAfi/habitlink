@@ -24,23 +24,32 @@ interface HabitCardProps {
     title: string;
     description: string | null;
     category?: string;
+    habit_type?: string;
+    target_value?: number;
+    target_unit?: string;
   };
   completedToday: boolean;
   currentStreak: number;
+  todayProgress?: number;
   onToggle: () => void;
   onDelete: () => void;
   onEdit: () => void;
+  onProgressUpdate?: (progress: number) => void;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
   habit,
   completedToday,
   currentStreak,
+  todayProgress = 0,
   onToggle,
   onDelete,
   onEdit,
+  onProgressUpdate,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(todayProgress);
+  const [showProgressInput, setShowProgressInput] = useState(false);
 
   const handleToggle = async () => {
     setLoading(true);
@@ -48,8 +57,28 @@ const HabitCard: React.FC<HabitCardProps> = ({
     setLoading(false);
   };
 
+  const handleProgressUpdate = async (newProgress: number) => {
+    if (onProgressUpdate) {
+      setProgress(newProgress);
+      await onProgressUpdate(newProgress);
+      setShowProgressInput(false);
+    }
+  };
+
+  const handleQuickProgress = (increment: number) => {
+    const newProgress = Math.max(0, progress + increment);
+    handleProgressUpdate(newProgress);
+  };
+
   // Get category info
   const categoryInfo = HABIT_CATEGORIES.find(cat => cat.id === habit.category) || HABIT_CATEGORIES.find(cat => cat.id === 'other')!;
+  
+  // Determine habit type and target
+  const habitType = habit.habit_type || 'binary';
+  const targetValue = habit.target_value || 1;
+  const targetUnit = habit.target_unit || '';
+  const progressPercentage = habitType === 'binary' ? (completedToday ? 100 : 0) : (targetValue > 0 ? (progress / targetValue) * 100 : 0);
+  const isCompleted = habitType === 'binary' ? completedToday : progress >= targetValue;
 
   return (
     <View style={styles.card}>
@@ -72,6 +101,32 @@ const HabitCard: React.FC<HabitCardProps> = ({
           {habit.description && (
             <Text style={styles.habitDescription}>{habit.description}</Text>
           )}
+          
+          {/* Progress display for count/time-based habits */}
+          {habitType !== 'binary' && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressInfo}>
+                <Text style={styles.progressText}>
+                  {progress.toFixed(habitType === 'time' ? 1 : 0)} / {targetValue} {targetUnit}
+                </Text>
+                <Text style={styles.progressPercentage}>
+                  {progressPercentage.toFixed(0)}%
+                </Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill,
+                    { 
+                      width: `${Math.min(100, progressPercentage)}%`,
+                      backgroundColor: isCompleted ? theme.colors.success : theme.colors.primary,
+                    }
+                  ]} 
+                />
+              </View>
+            </View>
+          )}
+          
           {currentStreak > 0 && (
             <View style={styles.streakContainer}>
               <Text style={styles.streakEmoji}>🔥</Text>
@@ -96,6 +151,35 @@ const HabitCard: React.FC<HabitCardProps> = ({
           >
             <Text style={styles.deleteIcon}>🗑️</Text>
           </TouchableOpacity>
+
+          {/* Progress controls for count/time-based habits */}
+          {habitType !== 'binary' && (
+            <View style={styles.progressControls}>
+              <TouchableOpacity
+                style={styles.progressButton}
+                onPress={() => handleQuickProgress(-1)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.progressButtonText}>-</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.progressButton}
+                onPress={() => setShowProgressInput(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.progressButtonText}>{progress}</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.progressButton}
+                onPress={() => handleQuickProgress(1)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.progressButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           
           <TouchableOpacity
             style={styles.checkButton}
@@ -103,7 +187,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
             disabled={loading}
             activeOpacity={0.8}
           >
-            {completedToday ? (
+            {isCompleted ? (
               <LinearGradient
                 colors={theme.gradients.purple as [string, string, ...string[]]}
                 style={styles.checkButtonGradient}
@@ -260,6 +344,56 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     backgroundColor: theme.colors.surface,
+  },
+  progressContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  progressText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+  progressPercentage: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: theme.colors.textSecondary,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.backgroundLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  progressButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.text,
   },
 });
 

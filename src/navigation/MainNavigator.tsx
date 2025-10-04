@@ -1,7 +1,7 @@
 // src/navigation/MainNavigator.tsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/habit/HomeScreen";
 import FeedScreen from "../screens/FeedScreen";
 import FriendsScreen from "../screens/FriendsScreen";
@@ -20,7 +20,7 @@ export type ProfileStackParamList = {
   Notifications: undefined;
 };
 
-const Stack = createStackNavigator<ProfileStackParamList>();
+const Stack = createNativeStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const ProfileStack = () => {

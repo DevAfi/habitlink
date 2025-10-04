@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../utils/theme';
-import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../services/supabaseClient';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../services/supabaseClient';
 import * as Notifications from 'expo-notifications';
 
 const { width, height } = Dimensions.get('window');
