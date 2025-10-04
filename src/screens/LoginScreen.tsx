@@ -1,5 +1,5 @@
 // src/screens/LoginScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,16 @@ import {
   Platform,
   Alert,
   ScrollView,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import { useAuth } from '../context/AuthContext';
 import { theme } from '../utils/theme';
+
+const { width, height } = Dimensions.get('window');
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -27,7 +31,55 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn } = useAuth();
+
+  // Animation values
+  const fadeAnim = useState(new Animated.Value(0))[0];
+  const slideAnim = useState(new Animated.Value(50))[0];
+  const logoScale = useState(new Animated.Value(0.8))[0];
+  const glowAnim = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    // Entrance animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoScale, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Continuous glow animation
+    const glowAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    glowAnimation.start();
+
+    return () => glowAnimation.stop();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -48,15 +100,78 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       {/* Gradient background with glow effects */}
       <LinearGradient
-        colors={theme.gradients.background}
+        colors={theme.gradients.background as [string, string, ...string[]]}
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
       
-      {/* Purple glow orbs */}
-      <View style={styles.glowOrb1} />
-      <View style={styles.glowOrb2} />
+      {/* Animated Purple glow orbs */}
+      <Animated.View 
+        style={[
+          styles.glowOrb1,
+          {
+            opacity: glowAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.08, 0.15],
+            }),
+            transform: [
+              {
+                scale: glowAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 1.2],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+      <Animated.View 
+        style={[
+          styles.glowOrb2,
+          {
+            opacity: glowAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.05, 0.12],
+            }),
+            transform: [
+              {
+                scale: glowAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 1.3],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+
+      {/* Floating particles */}
+      <View style={styles.particlesContainer}>
+        {[...Array(6)].map((_, i) => (
+          <Animated.View
+            key={i}
+              style={[
+                styles.particle,
+                {
+                  left: Math.random() * width,
+                  top: Math.random() * height,
+                },
+              {
+                opacity: fadeAnim,
+                transform: [
+                  {
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 50],
+                      outputRange: [0, -20],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
+        ))}
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -67,25 +182,73 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.content}>
+          <Animated.View 
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
             {/* Header */}
-            <View style={styles.header}>
-              <LinearGradient
-                colors={theme.gradients.purple}
-                style={styles.logoCircle}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+            <Animated.View 
+              style={[
+                styles.header,
+                {
+                  transform: [{ scale: logoScale }],
+                },
+              ]}
+            >
+              <Animated.View
+                style={[
+                  styles.logoContainer,
+                  {
+                    transform: [
+                      {
+                        rotate: glowAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '360deg'],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
               >
-                <Text style={styles.logoText}>HL</Text>
-              </LinearGradient>
+                <LinearGradient
+                  colors={theme.gradients.purple as [string, string, ...string[]]}
+                  style={styles.logoCircle}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.logoText}>HL</Text>
+                </LinearGradient>
+                <View style={styles.logoGlow} />
+              </Animated.View>
               <Text style={styles.title}>Welcome Back</Text>
               <Text style={styles.subtitle}>Sign in to continue your journey</Text>
-            </View>
+            </Animated.View>
 
             {/* Form Card */}
-            <View style={styles.formCard}>
+            <Animated.View 
+              style={[
+                styles.formCard,
+                {
+                  transform: [
+                    {
+                      translateY: slideAnim.interpolate({
+                        inputRange: [0, 50],
+                        outputRange: [0, 20],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Email</Text>
+                <Text style={styles.inputLabel}>
+                  📧 Email
+                </Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
@@ -100,7 +263,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Password</Text>
+                <Text style={styles.inputLabel}>
+                  🔒 Password
+                </Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.input}
@@ -108,8 +273,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                     placeholderTextColor={theme.colors.textSecondary}
                     value={password}
                     onChangeText={setPassword}
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                   />
+                  <TouchableOpacity
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.eyeIcon}>
+                      {showPassword ? '👁️' : '🙈'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
 
@@ -120,29 +294,46 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={theme.gradients.purple}
+                  colors={theme.gradients.purple as [string, string, ...string[]]}
                   style={styles.button}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                 >
                   <Text style={styles.buttonText}>
-                    {loading ? 'Signing In...' : 'Sign In'}
+                    {loading ? '🔄 Signing In...' : '✨ Sign In'}
                   </Text>
                 </LinearGradient>
+                <View style={styles.buttonShine} />
               </TouchableOpacity>
-            </View>
+            </Animated.View>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Signup')}
-              style={styles.footer}
-              activeOpacity={0.7}
+            <Animated.View 
+              style={[
+                styles.footer,
+                {
+                  opacity: fadeAnim,
+                  transform: [
+                    {
+                      translateY: slideAnim.interpolate({
+                        inputRange: [0, 50],
+                        outputRange: [0, 10],
+                      }),
+                    },
+                  ],
+                },
+              ]}
             >
-              <Text style={styles.footerText}>
-                Don't have an account?{' '}
-                <Text style={styles.footerLink}>Create one</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Signup')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.footerText}>
+                  Don't have an account?{' '}
+                  <Text style={styles.footerLink}>✨ Create one</Text>
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -168,7 +359,6 @@ const styles = StyleSheet.create({
     opacity: 0.08,
     top: -250,
     right: -200,
-    filter: 'blur(80px)',
   },
   glowOrb2: {
     position: 'absolute',
@@ -179,7 +369,19 @@ const styles = StyleSheet.create({
     opacity: 0.05,
     bottom: -150,
     left: -150,
-    filter: 'blur(80px)',
+  },
+  particlesContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  particle: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.primary,
+    opacity: 0.6,
   },
   keyboardView: {
     flex: 1,
@@ -199,14 +401,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 36,
   },
+  logoContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    boxShadow: '0px 8px 40px rgba(107, 92, 231, 0.4)',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  logoGlow: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: theme.colors.primary,
+    opacity: 0.1,
+    top: -10,
+    left: -10,
   },
   logoText: {
     fontSize: 28,
@@ -249,23 +468,47 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   input: {
+    flex: 1,
     height: 48,
     paddingHorizontal: 16,
     fontSize: 15,
     color: theme.colors.text,
   },
+  eyeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  eyeIcon: {
+    fontSize: 16,
+  },
   buttonWrapper: {
     marginTop: 8,
     borderRadius: 12,
     overflow: 'hidden',
-    boxShadow: '0px 6px 24px rgba(107, 92, 231, 0.35)',
+    position: 'relative',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    elevation: 8,
   },
   button: {
     height: 52,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonShine: {
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    transform: [{ skewX: '-15deg' }],
   },
   buttonDisabled: {
     opacity: 0.5,
