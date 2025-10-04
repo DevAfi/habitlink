@@ -25,40 +25,54 @@ interface Props {
 const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
 
   const handleSignup = async () => {
-    if (!email || !username || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
+  const fullname = `${firstName} ${lastName}`.trim();
 
-    if (username.length < 3) {
-      Alert.alert('Error', 'Username must be at least 3 characters');
-      return;
-    }
+  if (!email || !username || !password || !firstName || !lastName) {
+    Alert.alert('Error', 'Please fill in all fields');
+    return;
+  }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
-      return;
-    }
+  if (firstName.length < 2) {
+    Alert.alert('Error', 'First name must be at least 2 characters');
+    return;
+  }
 
-    setLoading(true);
-    const { error } = await signUp(email, password, username);
-    setLoading(false);
+  if (lastName.length < 2) {
+    Alert.alert('Error', 'Last name must be at least 2 characters');
+    return;
+  }
 
-    if (error) {
-      Alert.alert('Signup Failed', error.message);
-    } else {
-      Alert.alert(
-        'Welcome! 🎉',
-        'Your account has been created successfully. Let\'s start building habits!',
-        [{ text: 'Get Started', onPress: () => navigation.navigate('Login') }]
-      );
-    }
-  };
+  if (username.length < 3) {
+    Alert.alert('Error', 'Username must be at least 3 characters');
+    return;
+  }
+
+  if (password.length < 6) {
+    Alert.alert('Error', 'Password must be at least 6 characters');
+    return;
+  }
+
+  setLoading(true);
+  const { error } = await signUp(email, password, username, fullname);
+  setLoading(false);
+
+  if (error) {
+    Alert.alert('Signup Failed', error.message);
+  } else {
+    Alert.alert(
+      'Welcome! 🎉',
+      'Your account has been created successfully. Let\'s start building habits!',
+      [{ text: 'Get Started', onPress: () => navigation.navigate('Login') }]
+    );
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -81,6 +95,34 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           {/* Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>First Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your first name"
+                placeholderTextColor={theme.colors.textLight}
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Last Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your Last name"
+                placeholderTextColor={theme.colors.textLight}
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Username</Text>
