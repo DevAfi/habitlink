@@ -9,8 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  Animated,
+  ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import { useAuth } from '../context/AuthContext';
@@ -44,71 +45,107 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        {/* Logo/Brand Section */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>HL</Text>
+    <View style={styles.container}>
+      {/* Gradient background with glow effects */}
+      <LinearGradient
+        colors={theme.gradients.background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
+      
+      {/* Purple glow orbs */}
+      <View style={styles.glowOrb1} />
+      <View style={styles.glowOrb2} />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            {/* Header */}
+            <View style={styles.header}>
+              <LinearGradient
+                colors={theme.gradients.purple}
+                style={styles.logoCircle}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.logoText}>HL</Text>
+              </LinearGradient>
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+            </View>
+
+            {/* Form Card */}
+            <View style={styles.formCard}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="you@example.com"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.buttonWrapper, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={theme.gradients.purple}
+                  style={styles.button}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.buttonText}>
+                    {loading ? 'Signing In...' : 'Sign In'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Signup')}
+              style={styles.footer}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.footerText}>
+                Don't have an account?{' '}
+                <Text style={styles.footerLink}>Create one</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.title}>HabitLink</Text>
-          <Text style={styles.subtitle}>Build habits together, stay accountable</Text>
-        </View>
-
-        {/* Form Section */}
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="you@example.com"
-              placeholderTextColor={theme.colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={theme.colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? 'Logging in...' : 'Log In'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Signup')}
-            style={styles.linkContainer}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.linkText}>
-              Don't have an account?{' '}
-              <Text style={styles.linkBold}>Sign up</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -117,93 +154,139 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: theme.spacing.lg,
-    justifyContent: 'center',
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
-  logoContainer: {
+  glowOrb1: {
+    position: 'absolute',
+    width: 500,
+    height: 500,
+    borderRadius: 250,
+    backgroundColor: theme.colors.primary,
+    opacity: 0.08,
+    top: -250,
+    right: -200,
+    filter: 'blur(80px)',
+  },
+  glowOrb2: {
+    position: 'absolute',
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: theme.colors.accent,
+    opacity: 0.05,
+    bottom: -150,
+    left: -150,
+    filter: 'blur(80px)',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  content: {
+    paddingHorizontal: 24,
+    maxWidth: 450,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xxl,
+    marginBottom: 36,
   },
   logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.primary,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
-    ...theme.shadows.lg,
+    marginBottom: 20,
+    boxShadow: '0px 8px 40px rgba(107, 92, 231, 0.4)',
   },
   logoText: {
-    fontSize: theme.fontSize.xxxl,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: 28,
+    fontWeight: '800',
     color: theme.colors.textOnPrimary,
+    letterSpacing: -1,
   },
   title: {
-    fontSize: theme.fontSize.display,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
+    fontSize: 34,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: theme.fontSize.base,
+    fontSize: 16,
     color: theme.colors.textLight,
-    textAlign: 'center',
-    paddingHorizontal: theme.spacing.lg,
+    letterSpacing: 0.2,
   },
-  formContainer: {
-    width: '100%',
+  formCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.4)',
   },
   inputContainer: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: 18,
   },
   inputLabel: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-    marginLeft: theme.spacing.xs,
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.textLight,
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  inputWrapper: {
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   input: {
-    height: 56,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    fontSize: theme.fontSize.base,
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 15,
     color: theme.colors.text,
-    ...theme.shadows.sm,
+  },
+  buttonWrapper: {
+    marginTop: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+    boxShadow: '0px 6px 24px rgba(107, 92, 231, 0.35)',
   },
   button: {
-    backgroundColor: theme.colors.primary,
-    height: 56,
-    borderRadius: theme.borderRadius.md,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: theme.spacing.md,
-    ...theme.shadows.md,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   buttonText: {
     color: theme.colors.textOnPrimary,
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  linkContainer: {
-    marginTop: theme.spacing.xl,
+  footer: {
+    marginTop: 28,
     alignItems: 'center',
   },
-  linkText: {
-    textAlign: 'center',
+  footerText: {
+    fontSize: 15,
     color: theme.colors.textLight,
-    fontSize: theme.fontSize.base,
   },
-  linkBold: {
+  footerLink: {
     color: theme.colors.primary,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: '600',
   },
 });
 

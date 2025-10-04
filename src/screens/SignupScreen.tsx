@@ -11,6 +11,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import { useAuth } from '../context/AuthContext';
@@ -32,160 +33,194 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const { signUp } = useAuth();
 
   const handleSignup = async () => {
-  const fullname = `${firstName} ${lastName}`.trim();
+    const fullname = `${firstName} ${lastName}`.trim();
 
-  if (!email || !username || !password || !firstName || !lastName) {
-    Alert.alert('Error', 'Please fill in all fields');
-    return;
-  }
+    if (!email || !username || !password || !firstName || !lastName) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
 
-  if (firstName.length < 2) {
-    Alert.alert('Error', 'First name must be at least 2 characters');
-    return;
-  }
+    if (firstName.length < 2) {
+      Alert.alert('Error', 'First name must be at least 2 characters');
+      return;
+    }
 
-  if (lastName.length < 2) {
-    Alert.alert('Error', 'Last name must be at least 2 characters');
-    return;
-  }
+    if (lastName.length < 2) {
+      Alert.alert('Error', 'Last name must be at least 2 characters');
+      return;
+    }
 
-  if (username.length < 3) {
-    Alert.alert('Error', 'Username must be at least 3 characters');
-    return;
-  }
+    if (username.length < 3) {
+      Alert.alert('Error', 'Username must be at least 3 characters');
+      return;
+    }
 
-  if (password.length < 6) {
-    Alert.alert('Error', 'Password must be at least 6 characters');
-    return;
-  }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
 
-  setLoading(true);
-  const { error } = await signUp(email, password, username, fullname);
-  setLoading(false);
+    setLoading(true);
+    const { error } = await signUp(email, password, username, fullname);
+    setLoading(false);
 
-  if (error) {
-    Alert.alert('Signup Failed', error.message);
-  } else {
-    Alert.alert(
-      'Welcome! 🎉',
-      'Your account has been created successfully. Let\'s start building habits!',
-      [{ text: 'Get Started', onPress: () => navigation.navigate('Login') }]
-    );
-  }
-};
+    if (error) {
+      Alert.alert('Signup Failed', error.message);
+    } else {
+      Alert.alert(
+        'Welcome',
+        'Your account has been created successfully',
+        [{ text: 'Get Started', onPress: () => navigation.navigate('Login') }]
+      );
+    }
+  };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.container}>
+      {/* Gradient background with glow effects */}
+      <LinearGradient
+        colors={theme.gradients.background}
+        style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
+      
+      {/* Purple glow orbs */}
+      <View style={styles.glowOrb1} />
+      <View style={styles.glowOrb2} />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
       >
-        <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoText}>HL</Text>
-            </View>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join HabitLink and start your journey</Text>
-          </View>
-
-          {/* Form */}
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>First Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your first name"
-                placeholderTextColor={theme.colors.textLight}
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCapitalize="none"
-              />
-            </View>
-          </View>
-
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Last Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your Last name"
-                placeholderTextColor={theme.colors.textLight}
-                value={lastName}
-                onChangeText={setLastName}
-                autoCapitalize="none"
-              />
-            </View>
-          </View>
-
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Username</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Choose a unique username"
-                placeholderTextColor={theme.colors.textLight}
-                value={username}
-                onChangeText={setUsername}
-                autoCapitalize="none"
-              />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            {/* Header */}
+            <View style={styles.header}>
+              <LinearGradient
+                colors={theme.gradients.purple}
+                style={styles.logoCircle}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.logoText}>HL</Text>
+              </LinearGradient>
+              <Text style={styles.title}>Create Account</Text>
+              <Text style={styles.subtitle}>Start your habit journey</Text>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="you@example.com"
-                placeholderTextColor={theme.colors.textLight}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-            </View>
+            {/* Form Card */}
+            <View style={styles.formCard}>
+              <View style={styles.row}>
+                <View style={[styles.inputContainer, styles.halfWidth]}>
+                  <Text style={styles.inputLabel}>First Name</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="John"
+                      placeholderTextColor={theme.colors.textSecondary}
+                      value={firstName}
+                      onChangeText={setFirstName}
+                      autoCapitalize="words"
+                    />
+                  </View>
+                </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="At least 6 characters"
-                placeholderTextColor={theme.colors.textLight}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+                <View style={[styles.inputContainer, styles.halfWidth]}>
+                  <Text style={styles.inputLabel}>Last Name</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Doe"
+                      placeholderTextColor={theme.colors.textSecondary}
+                      value={lastName}
+                      onChangeText={setLastName}
+                      autoCapitalize="words"
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Username</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="johndoe"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={username}
+                    onChangeText={setUsername}
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="john@example.com"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Minimum 6 characters"
+                    placeholderTextColor={theme.colors.textSecondary}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.buttonWrapper, loading && styles.buttonDisabled]}
+                onPress={handleSignup}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={theme.gradients.purple}
+                  style={styles.button}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.buttonText}>
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleSignup}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Creating account...' : 'Sign Up'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
               onPress={() => navigation.navigate('Login')}
-              style={styles.linkContainer}
+              style={styles.footer}
               activeOpacity={0.7}
             >
-              <Text style={styles.linkText}>
+              <Text style={styles.footerText}>
                 Already have an account?{' '}
-                <Text style={styles.linkBold}>Log in</Text>
+                <Text style={styles.footerLink}>Sign in</Text>
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -194,96 +229,146 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  glowOrb1: {
+    position: 'absolute',
+    width: 500,
+    height: 500,
+    borderRadius: 250,
+    backgroundColor: theme.colors.primary,
+    opacity: 0.08,
+    top: -250,
+    right: -200,
+    filter: 'blur(80px)',
+  },
+  glowOrb2: {
+    position: 'absolute',
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: theme.colors.accent,
+    opacity: 0.05,
+    bottom: -150,
+    left: -150,
+    filter: 'blur(80px)',
+  },
+  keyboardView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 40,
   },
   content: {
-    flex: 1,
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.xxl,
-    paddingBottom: theme.spacing.xl,
+    paddingHorizontal: 24,
+    maxWidth: 450,
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: 36,
   },
   logoCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.primary,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
-    ...theme.shadows.lg,
+    marginBottom: 20,
+    boxShadow: '0px 8px 40px rgba(107, 92, 231, 0.4)',
   },
   logoText: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: 28,
+    fontWeight: '800',
     color: theme.colors.textOnPrimary,
+    letterSpacing: -1,
   },
   title: {
-    fontSize: theme.fontSize.xxxl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
+    fontSize: 34,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: theme.fontSize.base,
+    fontSize: 16,
     color: theme.colors.textLight,
-    textAlign: 'center',
+    letterSpacing: 0.2,
   },
-  formContainer: {
-    width: '100%',
+  formCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.4)',
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
   },
   inputContainer: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: 18,
+  },
+  halfWidth: {
+    flex: 1,
   },
   inputLabel: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-    marginLeft: theme.spacing.xs,
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.textLight,
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  inputWrapper: {
+    backgroundColor: theme.colors.backgroundLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   input: {
-    height: 56,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    fontSize: theme.fontSize.base,
+    height: 48,
+    paddingHorizontal: 16,
+    fontSize: 15,
     color: theme.colors.text,
-    ...theme.shadows.sm,
+  },
+  buttonWrapper: {
+    marginTop: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+    boxShadow: '0px 6px 24px rgba(107, 92, 231, 0.35)',
   },
   button: {
-    backgroundColor: theme.colors.primary,
-    height: 56,
-    borderRadius: theme.borderRadius.md,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: theme.spacing.md,
-    ...theme.shadows.md,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   buttonText: {
     color: theme.colors.textOnPrimary,
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  linkContainer: {
-    marginTop: theme.spacing.xl,
+  footer: {
+    marginTop: 28,
     alignItems: 'center',
   },
-  linkText: {
-    textAlign: 'center',
+  footerText: {
+    fontSize: 15,
     color: theme.colors.textLight,
-    fontSize: theme.fontSize.base,
   },
-  linkBold: {
+  footerLink: {
     color: theme.colors.primary,
-    fontWeight: theme.fontWeight.semibold,
+    fontWeight: '600',
   },
 });
 

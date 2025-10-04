@@ -2,34 +2,40 @@
 
 export const theme = {
   colors: {
-    primary: '#1e3a5f',        // Deep blue
-    primaryLight: '#2d5a8f',   // Lighter blue
-    primaryDark: '#0f1f3d',    // Darker blue
+    // Dark mode primary colors
+    primary: '#6b5ce7',        // Vibrant purple
+    primaryLight: '#8b7ef8',   // Lighter purple
+    primaryDark: '#5347c4',    // Deeper purple
     
-    accent: '#f4e8d8',         // Cream
-    accentDark: '#e8d5ba',     // Darker cream
+    accent: '#f5e6d3',         // Warm cream
+    accentDark: '#e8d4b8',     // Darker cream
     
-    background: '#faf8f5',     // Off-white/cream background
-    surface: '#ffffff',        // Pure white for cards
+    background: '#0a0e1a',     // Very dark blue-black
+    backgroundLight: '#141824', // Slightly lighter dark
+    surface: '#1a1f2e',        // Dark surface for cards
+    surfaceLight: '#242938',   // Lighter surface
     
-    text: '#1a1a1a',           // Almost black
-    textLight: '#6b7280',      // Gray
-    textSecondary: '#9ca3af',  // Lighter gray
-    textOnPrimary: '#ffffff',  // White text on blue
+    text: '#f5f5f7',           // Off-white text
+    textLight: '#9ca3af',      // Gray text
+    textSecondary: '#6b7280',  // Darker gray
+    textOnPrimary: '#ffffff',  // White text on purple
+    textOnAccent: '#0a0e1a',   // Dark text on cream
     
     success: '#10b981',        // Green for completions
     info: '#3b82f6',           // Blue for info
     warning: '#f59e0b',        // Amber for streaks
     error: '#ef4444',          // Red for destructive
     
-    border: '#e5e7eb',         // Light gray border
-    borderLight: '#f3f4f6',    // Very light gray
-    shadow: 'rgba(30, 58, 95, 0.1)', // Blue-tinted shadow
+    border: '#2d3748',         // Dark border
+    borderLight: '#374151',    // Slightly lighter border
+    shadow: 'rgba(0, 0, 0, 0.3)', // Dark shadow
   },
   
   gradients: {
-    primary: ['#1e3a5f', '#2d5a8f'],
-    accent: ['#f4e8d8', '#e8d5ba'],
+    primary: ['#6b5ce7', '#8b7ef8'],
+    accent: ['#f5e6d3', '#e8d4b8'],
+    background: ['#0a0e1a', '#141824', '#1a1f2e'],
+    purple: ['#5347c4', '#6b5ce7', '#8b7ef8'],
   },
   
   spacing: {
