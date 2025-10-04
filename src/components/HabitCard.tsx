@@ -4,11 +4,26 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../utils/theme';
 import { supabase } from '../services/supabaseClient';
 
+// Habit categories with icons and colors (same as AddHabitModal)
+const HABIT_CATEGORIES = [
+  { id: 'health', name: 'Health & Fitness', icon: '💪', colors: ['#FF6B6B', '#FF8E8E'] },
+  { id: 'mindfulness', name: 'Mindfulness', icon: '🧘', colors: ['#4ECDC4', '#45B7B8'] },
+  { id: 'productivity', name: 'Productivity', icon: '⚡', colors: ['#FFD93D', '#FFA726'] },
+  { id: 'learning', name: 'Learning', icon: '📚', colors: ['#9B59B6', '#8E44AD'] },
+  { id: 'social', name: 'Social', icon: '👥', colors: ['#3498DB', '#2980B9'] },
+  { id: 'creative', name: 'Creative', icon: '🎨', colors: ['#E91E63', '#C2185B'] },
+  { id: 'personal', name: 'Personal Care', icon: '✨', colors: ['#FF9800', '#F57C00'] },
+  { id: 'finance', name: 'Finance', icon: '💰', colors: ['#4CAF50', '#388E3C'] },
+  { id: 'home', name: 'Home & Organization', icon: '🏠', colors: ['#795548', '#5D4037'] },
+  { id: 'other', name: 'Other', icon: '🌟', colors: ['#607D8B', '#455A64'] },
+];
+
 interface HabitCardProps {
   habit: {
     id: string;
     title: string;
     description: string | null;
+    category?: string;
   };
   completedToday: boolean;
   currentStreak: number;
@@ -31,11 +46,27 @@ const HabitCard: React.FC<HabitCardProps> = ({
     setLoading(false);
   };
 
+  // Get category info
+  const categoryInfo = HABIT_CATEGORIES.find(cat => cat.id === habit.category) || HABIT_CATEGORIES.find(cat => cat.id === 'other')!;
+
   return (
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <View style={styles.habitInfo}>
-          <Text style={styles.habitTitle}>{habit.title}</Text>
+          <View style={styles.habitHeader}>
+            <Text style={styles.habitTitle}>{habit.title}</Text>
+            <View style={styles.categoryBadge}>
+              <LinearGradient
+                colors={categoryInfo.colors as [string, string, ...string[]]}
+                style={styles.categoryGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.categoryIcon}>{categoryInfo.icon}</Text>
+                <Text style={styles.categoryName}>{categoryInfo.name}</Text>
+              </LinearGradient>
+            </View>
+          </View>
           {habit.description && (
             <Text style={styles.habitDescription}>{habit.description}</Text>
           )}
@@ -101,6 +132,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 16,
   },
+  habitHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -110,7 +147,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: theme.colors.text,
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 12,
+  },
+  categoryBadge: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+  },
+  categoryGradient: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryIcon: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+  categoryName: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: theme.colors.textOnPrimary,
   },
   habitDescription: {
     fontSize: 14,

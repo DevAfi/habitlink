@@ -10,11 +10,26 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../utils/theme';
 import { supabase } from '../../services/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+
+// Habit categories with icons and colors
+const HABIT_CATEGORIES = [
+  { id: 'health', name: 'Health & Fitness', icon: '💪', colors: ['#FF6B6B', '#FF8E8E'] },
+  { id: 'mindfulness', name: 'Mindfulness', icon: '🧘', colors: ['#4ECDC4', '#45B7B8'] },
+  { id: 'productivity', name: 'Productivity', icon: '⚡', colors: ['#FFD93D', '#FFA726'] },
+  { id: 'learning', name: 'Learning', icon: '📚', colors: ['#9B59B6', '#8E44AD'] },
+  { id: 'social', name: 'Social', icon: '👥', colors: ['#3498DB', '#2980B9'] },
+  { id: 'creative', name: 'Creative', icon: '🎨', colors: ['#E91E63', '#C2185B'] },
+  { id: 'personal', name: 'Personal Care', icon: '✨', colors: ['#FF9800', '#F57C00'] },
+  { id: 'finance', name: 'Finance', icon: '💰', colors: ['#4CAF50', '#388E3C'] },
+  { id: 'home', name: 'Home & Organization', icon: '🏠', colors: ['#795548', '#5D4037'] },
+  { id: 'other', name: 'Other', icon: '🌟', colors: ['#607D8B', '#455A64'] },
+];
 
 interface AddHabitModalProps {
   visible: boolean;
@@ -25,6 +40,7 @@ interface AddHabitModalProps {
 const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabitAdded }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('other');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -47,6 +63,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabit
         user_id: user.id,
         title: title.trim(),
         description: description.trim() || null,
+        category: selectedCategory,
       });
 
     setLoading(false);
@@ -66,6 +83,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabit
   const handleClose = () => {
     setTitle('');
     setDescription('');
+    setSelectedCategory('other');
     onClose();
   };
 
@@ -94,7 +112,8 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabit
             </TouchableOpacity>
           </View>
 
-          <View style={styles.form}>
+          <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Habit Name</Text>
               <View style={styles.inputWrapper}>
@@ -128,6 +147,47 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabit
               <Text style={styles.charCount}>{description.length}/200</Text>
             </View>
 
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Category</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScroll}
+                contentContainerStyle={styles.categoryContainer}
+              >
+                {HABIT_CATEGORIES.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[
+                      styles.categoryItem,
+                      selectedCategory === category.id && styles.categoryItemSelected
+                    ]}
+                    onPress={() => setSelectedCategory(category.id)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={
+                        selectedCategory === category.id 
+                          ? category.colors as [string, string, ...string[]]
+                          : [theme.colors.backgroundLight, theme.colors.backgroundLight] as [string, string, ...string[]]
+                      }
+                      style={styles.categoryGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <Text style={styles.categoryIcon}>{category.icon}</Text>
+                      <Text style={[
+                        styles.categoryName,
+                        selectedCategory === category.id && styles.categoryNameSelected
+                      ]}>
+                        {category.name}
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
             <TouchableOpacity
               style={[styles.buttonWrapper, loading && styles.buttonDisabled]}
               onPress={handleSubmit}
@@ -145,7 +205,8 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ visible, onClose, onHabit
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
-          </View>
+            </View>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -169,12 +230,16 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     maxWidth: 450,
+    maxHeight: '90%',
     backgroundColor: theme.colors.surface,
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
     borderColor: theme.colors.border,
     boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.4)',
+  },
+  scrollContainer: {
+    flex: 1,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -258,6 +323,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+  categoryScroll: {
+    marginTop: 8,
+  },
+  categoryContainer: {
+    paddingHorizontal: 4,
+    gap: 12,
+  },
+  categoryItem: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoryItemSelected: {
+    borderColor: theme.colors.primary,
+    boxShadow: '0px 4px 16px rgba(107, 92, 231, 0.3)',
+  },
+  categoryGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
+  },
+  categoryIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  categoryName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.textLight,
+    textAlign: 'center',
+  },
+  categoryNameSelected: {
+    color: theme.colors.textOnPrimary,
   },
 });
 

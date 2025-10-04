@@ -32,6 +32,8 @@ interface Friend {
   friendship_id?: string;
 }
 
+// I need to add a 'status' collumn in my database to make friend requests work so RIP
+
 interface FriendRequest {
   id: string;
   from_user: Friend;
