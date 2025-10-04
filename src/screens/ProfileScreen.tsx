@@ -15,6 +15,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../utils/theme";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../services/supabaseClient";
+import { useNavigation } from "@react-navigation/native";
+import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,6 +44,7 @@ interface Achievement {
 
 const ProfileScreen = () => {
   const { user, signOut } = useAuth();
+  const navigation = useNavigation();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -306,6 +309,74 @@ const ProfileScreen = () => {
     fetchAnalytics();
   };
 
+  // Chart data preparation
+  const getWeeklyChartData = () => {
+    if (!analytics) return null;
+    
+    return {
+      labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      datasets: [{
+        data: analytics.weeklyProgress,
+        color: (opacity = 1) => `rgba(107, 92, 231, ${opacity})`,
+        strokeWidth: 3,
+      }],
+    };
+  };
+
+  const getMonthlyChartData = () => {
+    if (!analytics) return null;
+    
+    const last30Days = analytics.monthlyProgress.slice(-30);
+    return {
+      labels: last30Days.map((_, index) => `${index + 1}`),
+      datasets: [{
+        data: last30Days,
+        color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
+        strokeWidth: 2,
+      }],
+    };
+  };
+
+  const getCategoryChartData = () => {
+    if (!analytics) return null;
+    
+    const categories = Object.entries(analytics.habitCategories);
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#FFD93D', '#9B59B6', '#3498DB',
+      '#E91E63', '#FF9800', '#4CAF50', '#795548', '#607D8B'
+    ];
+    
+    return categories.map(([category, count], index) => ({
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      population: count,
+      color: colors[index % colors.length],
+      legendFontColor: theme.colors.textLight,
+      legendFontSize: 12,
+    }));
+  };
+
+  const chartConfig = {
+    backgroundColor: theme.colors.surface,
+    backgroundGradientFrom: theme.colors.surface,
+    backgroundGradientTo: theme.colors.surface,
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(107, 92, 231, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: "6",
+      strokeWidth: "2",
+      stroke: theme.colors.primary,
+    },
+    propsForBackgroundLines: {
+      strokeDasharray: "5,5",
+      stroke: theme.colors.border,
+      strokeWidth: 1,
+    },
+  };
+
   const handleSignOut = () => {
     Alert.alert(
       'Sign Out',
@@ -393,9 +464,18 @@ const ProfileScreen = () => {
             </View>
           </View>
           
-          <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-            <Text style={styles.signOutText}>🚪</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Notifications' as never)} 
+              style={styles.settingsButton}
+            >
+              <Text style={styles.settingsText}>⚙️</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
+              <Text style={styles.signOutText}>🚪</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
 
         {/* Key Metrics */}
@@ -432,7 +512,7 @@ const ProfileScreen = () => {
         )}
 
         {/* Weekly Progress Chart */}
-        {analytics && (
+        {analytics && getWeeklyChartData() && (
           <Animated.View 
             style={[
               styles.chartContainer,
@@ -444,25 +524,20 @@ const ProfileScreen = () => {
           >
             <Text style={styles.sectionTitle}>📈 Weekly Progress</Text>
             <View style={styles.chartCard}>
-              <View style={styles.chart}>
-                {analytics.weeklyProgress.map((value, index) => (
-                  <View key={index} style={styles.chartBarContainer}>
-                    <View 
-                      style={[
-                        styles.chartBar,
-                        {
-                          height: Math.max(20, (value / Math.max(...analytics.weeklyProgress, 1)) * 100),
-                          backgroundColor: value > 0 ? theme.colors.primary : theme.colors.border,
-                        },
-                      ]}
-                    />
-                    <Text style={styles.chartBarLabel}>
-                      {['S', 'M', 'T', 'W', 'T', 'F', 'S'][index]}
-                    </Text>
-                    <Text style={styles.chartBarValue}>{value}</Text>
-                  </View>
-                ))}
-              </View>
+              <LineChart
+                data={getWeeklyChartData()!}
+                width={width - 80}
+                height={220}
+                chartConfig={chartConfig}
+                bezier
+                style={styles.chart}
+                withDots={true}
+                withShadow={false}
+                withScrollableDot={false}
+                withVerticalLabels={true}
+                withHorizontalLabels={true}
+                segments={3}
+              />
               <Text style={styles.chartDescription}>
                 Daily completions over the last 7 days
               </Text>
@@ -515,6 +590,72 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
               </View>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Monthly Progress Chart */}
+        {analytics && getMonthlyChartData() && (
+          <Animated.View 
+            style={[
+              styles.chartContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.sectionTitle}>📊 Monthly Progress</Text>
+            <View style={styles.chartCard}>
+              <BarChart
+                data={getMonthlyChartData()!}
+                width={width - 80}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=""
+                chartConfig={{
+                  ...chartConfig,
+                  color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
+                }}
+                style={styles.chart}
+                withHorizontalLabels={true}
+                withVerticalLabels={true}
+                showValuesOnTopOfBars={false}
+                segments={4}
+              />
+              <Text style={styles.chartDescription}>
+                Daily completions over the last 30 days
+              </Text>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Category Distribution Chart */}
+        {analytics && getCategoryChartData() && (
+          <Animated.View 
+            style={[
+              styles.chartContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.sectionTitle}>🎯 Habit Categories</Text>
+            <View style={styles.chartCard}>
+              <PieChart
+                data={getCategoryChartData()!}
+                width={width - 80}
+                height={220}
+                chartConfig={chartConfig}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                style={styles.chart}
+              />
+              <Text style={styles.chartDescription}>
+                Distribution of your habits by category
+              </Text>
             </View>
           </Animated.View>
         )}
@@ -683,6 +824,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textSecondary,
   },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  settingsText: {
+    fontSize: 20,
+  },
   signOutButton: {
     width: 44,
     height: 44,
@@ -763,11 +921,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   chart: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-    height: 120,
-    marginBottom: theme.spacing.md,
+    marginVertical: 8,
+    borderRadius: 16,
   },
   chartBarContainer: {
     alignItems: 'center',

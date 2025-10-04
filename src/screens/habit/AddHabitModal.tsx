@@ -31,6 +31,13 @@ const HABIT_CATEGORIES = [
   { id: 'other', name: 'Other', icon: '🌟', colors: ['#607D8B', '#455A64'] },
 ];
 
+// Habit types with descriptions
+const HABIT_TYPES = [
+  { id: 'binary', name: 'Yes/No', icon: '✅', description: 'Simple completion tracking' },
+  { id: 'count', name: 'Count', icon: '🔢', description: 'Track quantities (e.g., 10 push-ups)' },
+  { id: 'time', name: 'Duration', icon: '⏱️', description: 'Track time spent (e.g., 30 min meditation)' },
+];
+
 interface AddHabitModalProps {
   visible: boolean;
   onClose: () => void;
