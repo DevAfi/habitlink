@@ -29,6 +29,7 @@ interface HabitCardProps {
   currentStreak: number;
   onToggle: () => void;
   onDelete: () => void;
+  onEdit: () => void;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
@@ -37,6 +38,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
   currentStreak,
   onToggle,
   onDelete,
+  onEdit,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -79,6 +81,14 @@ const HabitCard: React.FC<HabitCardProps> = ({
         </View>
 
         <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={onEdit}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.editIcon}>✏️</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={onDelete}
@@ -190,6 +200,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: theme.colors.warning,
+  },
+  editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  editIcon: {
+    fontSize: 16,
   },
   deleteButton: {
     width: 40,

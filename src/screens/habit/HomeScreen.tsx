@@ -16,6 +16,7 @@ import { theme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../services/supabaseClient';
 import AddHabitModal from './AddHabitModal';
+import EditHabitModal from './EditHabitModal';
 import HabitCard from '../../components/HabitCard';
 
 const { width, height } = Dimensions.get('window');
@@ -36,6 +37,8 @@ interface HabitWithStats extends Habit {
 const HomeScreen = () => {
   const { signOut, user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habits, setHabits] = useState<HabitWithStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -251,6 +254,16 @@ const HomeScreen = () => {
     );
   };
 
+  const editHabit = (habit: Habit) => {
+    setSelectedHabit(habit);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedHabit(null);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchHabits();
@@ -374,6 +387,7 @@ const HomeScreen = () => {
                     currentStreak={habit.currentStreak}
                     onToggle={() => toggleHabit(habit.id, habit.completedToday)}
                     onDelete={() => deleteHabit(habit.id, habit.title)}
+                    onEdit={() => editHabit(habit)}
                   />
                 </Animated.View>
               ))}
@@ -412,6 +426,13 @@ const HomeScreen = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onHabitAdded={fetchHabits}
+      />
+
+      <EditHabitModal
+        visible={editModalVisible}
+        habit={selectedHabit}
+        onClose={closeEditModal}
+        onHabitUpdated={fetchHabits}
       />
     </View>
   );
