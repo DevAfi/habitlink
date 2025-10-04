@@ -1,7 +1,7 @@
 // src/navigation/MainNavigator.tsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screens/HomeScreen";
+import HomeScreen from "../screens/habit/HomeScreen";
 import FeedScreen from "../screens/FeedScreen";
 import FriendsScreen from "../screens/FriendsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
