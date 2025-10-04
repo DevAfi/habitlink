@@ -13,6 +13,7 @@ interface HabitCardProps {
   completedToday: boolean;
   currentStreak: number;
   onToggle: () => void;
+  onDelete: () => void;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
