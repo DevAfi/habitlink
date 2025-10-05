@@ -2,11 +2,14 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { TouchableOpacity, Text, Alert } from "react-native";
+import { useAuth } from "../context/AuthContext";
 import HomeScreen from "../screens/habit/HomeScreen";
 import FeedScreen from "../screens/FeedScreen";
 import FriendsScreen from "../screens/FriendsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
+import { theme } from "../utils/theme";
 
 export type MainTabParamList = {
   Home: undefined;
@@ -23,16 +26,61 @@ export type ProfileStackParamList = {
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+// Logout button component for header
+const LogoutButton = () => {
+  const { signOut } = useAuth();
+  
+  const handleLogout = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: signOut,
+        },
+      ]
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handleLogout}
+      style={{
+        marginRight: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+      }}
+      activeOpacity={0.7}
+    >
+      <Text style={{ 
+        color: theme.colors.text, 
+        fontSize: 14, 
+        fontWeight: '600' 
+      }}>
+        🚪 Sign Out
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 const ProfileStack = () => {
   return (
     <Stack.Navigator 
+      id={undefined}
       screenOptions={{ 
         headerShown: true,
         headerStyle: {
           backgroundColor: '#0a0e1a', // Dark background
-          borderBottomWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
         },
         headerTitleStyle: {
           color: '#f5f5f7', // Light text
@@ -61,13 +109,11 @@ const ProfileStack = () => {
 const MainNavigator = () => {
   return (
     <Tab.Navigator
+      id={undefined}
       screenOptions={{
         headerShown: true,
         headerStyle: {
           backgroundColor: '#0a0e1a', // Dark background
-          borderBottomWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
         },
         headerTitleStyle: {
           color: '#f5f5f7', // Light text
@@ -97,6 +143,7 @@ const MainNavigator = () => {
         component={HomeScreen}
         options={{
           title: "My Habits",
+          headerRight: () => <LogoutButton />,
         }}
       />
       <Tab.Screen

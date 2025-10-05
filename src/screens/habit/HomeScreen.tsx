@@ -39,7 +39,7 @@ interface HabitWithStats extends Habit {
 }
 
 const HomeScreen = () => {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
@@ -360,9 +360,6 @@ const HomeScreen = () => {
             <Text style={styles.greeting}>Good morning! 👋</Text>
             <Text style={styles.subtitle}>Let's build some great habits today</Text>
           </View>
-          <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
-            <Text style={styles.signOutText}>🚪</Text>
-          </TouchableOpacity>
         </Animated.View>
 
         {/* Daily Stats Section */}
@@ -509,15 +506,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.lg,
     paddingBottom: theme.spacing.md,
   },
   headerContent: {
-    flex: 1,
+    alignItems: 'flex-start',
   },
   greeting: {
     fontSize: theme.fontSize.xxl,
@@ -528,24 +522,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: theme.fontSize.base,
     color: theme.colors.textLight,
-  },
-  signOutButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  signOutText: {
-    fontSize: 20,
   },
   statsContainer: {
     paddingHorizontal: theme.spacing.lg,
