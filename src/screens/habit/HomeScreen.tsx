@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../services/supabaseClient';
+import { achievementService } from '../../services/achievementService';
 import AddHabitModal from './AddHabitModal';
 import EditHabitModal from './EditHabitModal';
 import HabitCard from '../../components/HabitCard';
@@ -222,6 +223,15 @@ const HomeScreen = () => {
     }
 
     fetchHabits();
+    
+    if (user) {
+      console.log('🎯 Triggering achievement check after habit toggle...');
+      achievementService.checkAndAwardAchievements(user.id).then(newAchievements => {
+        if (newAchievements.length > 0) {
+          console.log('🎉 New achievements earned!', newAchievements);
+        }
+      });
+    }
   };
 
   const updateHabitProgress = async (habitId: string, progress: number) => {
@@ -262,6 +272,15 @@ const HomeScreen = () => {
       }
 
       fetchHabits();
+      
+      if (user) {
+        console.log('🎯 Triggering achievement check after progress update...');
+        achievementService.checkAndAwardAchievements(user.id).then(newAchievements => {
+          if (newAchievements.length > 0) {
+            console.log('🎉 New achievements earned!', newAchievements);
+          }
+        });
+      }
     } catch (error) {
       console.error('Error updating progress:', error);
       Alert.alert('Error', 'Failed to update progress');

@@ -47,3 +47,39 @@ export interface FeedActivity {
   streak: number;
   is_milestone: boolean;
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: 'milestone' | 'streak' | 'weekly' | 'monthly' | 'special';
+  badge_color: string;
+  requirements: Record<string, any>;
+  points: number;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  achieved_at: string;
+  progress_data?: Record<string, any>;
+  achievement?: Achievement;
+}
+
+export interface UserStats {
+  id: string;
+  user_id: string;
+  total_points: number;
+  achievements_count: number;
+  longest_streak: number;
+  total_habits_completed: number;
+  level: number;
+  experience_points: number;
+  created_at: string;
+  updated_at: string;
+}

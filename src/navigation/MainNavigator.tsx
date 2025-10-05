@@ -9,12 +9,14 @@ import FeedScreen from "../screens/FeedScreen";
 import FriendsScreen from "../screens/FriendsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
+import AchievementsScreen from "../screens/AchievementsScreen";
 import { theme } from "../utils/theme";
 
 export type MainTabParamList = {
   Home: undefined;
   Feed: undefined;
   Friends: undefined;
+  Achievements: undefined;
   Profile: undefined;
 };
 
@@ -158,6 +160,13 @@ const MainNavigator = () => {
         component={FriendsScreen}
         options={{
           title: "Friends",
+        }}
+      />
+      <Tab.Screen
+        name="Achievements"
+        component={AchievementsScreen}
+        options={{
+          title: "Achievements",
         }}
       />
       <Tab.Screen

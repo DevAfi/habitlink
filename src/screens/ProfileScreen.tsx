@@ -33,20 +33,11 @@ interface AnalyticsData {
   improvementRate: number;
 }
 
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-  unlockedAt?: string;
-}
 
 const ProfileScreen = () => {
   const { user, signOut } = useAuth();
   const navigation = useNavigation();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -119,9 +110,6 @@ const ProfileScreen = () => {
       const analyticsData = calculateAnalytics(habits || [], completions || []);
       setAnalytics(analyticsData);
       
-      // Generate achievements
-      const userAchievements = generateAchievements(analyticsData);
-      setAchievements(userAchievements);
 
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -255,54 +243,6 @@ const ProfileScreen = () => {
     };
   };
 
-  const generateAchievements = (data: AnalyticsData): Achievement[] => {
-    const achievements: Achievement[] = [
-      {
-        id: 'first_habit',
-        title: 'Getting Started',
-        description: 'Created your first habit',
-        icon: '🎯',
-        unlocked: data.totalHabits >= 1,
-      },
-      {
-        id: 'first_completion',
-        title: 'First Success',
-        description: 'Completed your first habit',
-        icon: '✅',
-        unlocked: data.totalCompletions >= 1,
-      },
-      {
-        id: 'streak_7',
-        title: 'Week Warrior',
-        description: '7 day streak',
-        icon: '🔥',
-        unlocked: data.currentStreak >= 7,
-      },
-      {
-        id: 'streak_30',
-        title: 'Monthly Master',
-        description: '30 day streak',
-        icon: '🏆',
-        unlocked: data.currentStreak >= 30,
-      },
-      {
-        id: 'habit_master',
-        title: 'Habit Master',
-        description: 'Created 10 habits',
-        icon: '🎖️',
-        unlocked: data.totalHabits >= 10,
-      },
-      {
-        id: 'completion_100',
-        title: 'Century Club',
-        description: '100 total completions',
-        icon: '💯',
-        unlocked: data.totalCompletions >= 100,
-      },
-    ];
-
-    return achievements;
-  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -395,7 +335,6 @@ const ProfileScreen = () => {
       user: user?.username,
       exportDate: new Date().toISOString(),
       analytics,
-      achievements,
     };
 
     // In a real app, you'd implement actual data export
@@ -660,50 +599,6 @@ const ProfileScreen = () => {
           </Animated.View>
         )}
 
-        {/* Achievements */}
-        <Animated.View 
-          style={[
-            styles.achievementsContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <Text style={styles.sectionTitle}>🏅 Achievements</Text>
-          <View style={styles.achievementsGrid}>
-            {achievements.map((achievement, index) => (
-              <Animated.View
-                key={achievement.id}
-                style={[
-                  styles.achievementCard,
-                  {
-                    opacity: achievement.unlocked ? 1 : 0.4,
-                  },
-                  {
-                    transform: [
-                      {
-                        translateY: slideAnim.interpolate({
-                          inputRange: [0, 30],
-                          outputRange: [0, 10 + index * 5],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                <Text style={styles.achievementDescription}>{achievement.description}</Text>
-                {achievement.unlocked && (
-                  <View style={styles.achievementBadge}>
-                    <Text style={styles.achievementBadgeText}>✓</Text>
-                  </View>
-                )}
-              </Animated.View>
-            ))}
-          </View>
-        </Animated.View>
 
         {/* Data Export */}
         <Animated.View 
@@ -986,59 +881,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
   },
 
-  // Achievements
-  achievementsContainer: {
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
-  },
-  achievementsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: theme.spacing.md,
-  },
-  achievementCard: {
-    width: (width - theme.spacing.lg * 2 - theme.spacing.md) / 2,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: theme.spacing.md,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    position: 'relative',
-  },
-  achievementIcon: {
-    fontSize: 32,
-    marginBottom: theme.spacing.sm,
-  },
-  achievementTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  achievementDescription: {
-    fontSize: 11,
-    color: theme.colors.textLight,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-  achievementBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: theme.colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  achievementBadgeText: {
-    fontSize: 12,
-    color: theme.colors.textOnPrimary,
-    fontWeight: '700',
-  },
 
   // Export
   exportContainer: {
