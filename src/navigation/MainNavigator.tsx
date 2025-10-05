@@ -25,9 +25,35 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const ProfileStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#0a0e1a', // Dark background
+          borderBottomWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          color: '#f5f5f7', // Light text
+          fontSize: 18,
+          fontWeight: '600',
+        },
+        headerTintColor: '#f5f5f7', // Light text for back button
+      }}
+    >
+      <Stack.Screen 
+        name="ProfileMain" 
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Notifications" 
+        component={NotificationsScreen}
+        options={{ 
+          title: 'Notifications',
+        }}
+      />
     </Stack.Navigator>
   );
 };
@@ -37,8 +63,33 @@ const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: "#10b981",
-        tabBarInactiveTintColor: "#9ca3af",
+        headerStyle: {
+          backgroundColor: '#0a0e1a', // Dark background
+          borderBottomWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          color: '#f5f5f7', // Light text
+          fontSize: 18,
+          fontWeight: '600',
+        },
+        headerTintColor: '#f5f5f7', // Light text for back button
+        tabBarStyle: {
+          backgroundColor: '#0a0e1a', // Dark background
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor: "#6b5ce7", // Purple accent
+        tabBarInactiveTintColor: "#6b7280", // Muted gray
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+        },
       }}
     >
       <Tab.Screen
