@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Auth state changed:', event, session ? 'Session exists' : 'No session');
       setSession(session);
       if (session) {
         fetchUserProfile(session.user.id);
@@ -102,7 +103,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      console.log('🚪 Starting sign out process...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('❌ Error signing out:', error);
+        throw error;
+      }
+      
+      console.log('✅ Sign out successful');
+      
+      // Clear local state immediately
+      setSession(null);
+      setUser(null);
+    } catch (error) {
+      console.error('💥 Exception during sign out:', error);
+      throw error;
+    }
   };
 
   return (

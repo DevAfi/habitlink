@@ -35,7 +35,7 @@ interface AnalyticsData {
 
 
 const ProfileScreen = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigation = useNavigation();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -317,16 +317,6 @@ const ProfileScreen = () => {
     },
   };
 
-  const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: signOut },
-      ]
-    );
-  };
 
   const handleExportData = () => {
     if (!analytics) return;
@@ -411,9 +401,6 @@ const ProfileScreen = () => {
               <Text style={styles.settingsText}>⚙️</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-              <Text style={styles.signOutText}>🚪</Text>
-            </TouchableOpacity>
           </View>
         </Animated.View>
 
@@ -734,19 +721,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   settingsText: {
-    fontSize: 20,
-  },
-  signOutButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  signOutText: {
     fontSize: 20,
   },
 

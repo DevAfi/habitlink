@@ -226,6 +226,13 @@ const HomeScreen = () => {
     
     if (user) {
       console.log('🎯 Triggering achievement check after habit toggle...');
+      
+      // Add XP for habit completion
+      if (!currentlyCompleted) {
+        achievementService.addCompletionXP(user.id, habitId);
+      }
+      
+      // Check for new achievements
       achievementService.checkAndAwardAchievements(user.id).then(newAchievements => {
         if (newAchievements.length > 0) {
           console.log('🎉 New achievements earned!', newAchievements);
@@ -275,6 +282,13 @@ const HomeScreen = () => {
       
       if (user) {
         console.log('🎯 Triggering achievement check after progress update...');
+        
+        // Add XP for progress update (if it's a completion)
+        if (isCompleted) {
+          achievementService.addCompletionXP(user.id, habitId);
+        }
+        
+        // Check for new achievements
         achievementService.checkAndAwardAchievements(user.id).then(newAchievements => {
           if (newAchievements.length > 0) {
             console.log('🎉 New achievements earned!', newAchievements);

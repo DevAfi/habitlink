@@ -1,5 +1,5 @@
 // src/navigation/MainNavigator.tsx
-import React from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { TouchableOpacity, Text, Alert } from "react-native";
@@ -31,8 +31,28 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Logout button component for header
 const LogoutButton = () => {
   const { signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
   
   const handleLogout = () => {
+    console.log('🚪 Header LogoutButton handleLogout called!');
+    
+    // Try browser confirm first (works better in web)
+    if (typeof window !== 'undefined' && window.confirm) {
+      console.log('🌐 Using browser confirm dialog');
+      const confirmed = window.confirm('Are you sure you want to sign out?');
+      console.log('🤔 User confirmed:', confirmed);
+      
+      if (confirmed) {
+        console.log('✅ Header sign out confirmed via browser confirm');
+        performSignOut();
+      } else {
+        console.log('❌ Header sign out cancelled via browser confirm');
+      }
+      return;
+    }
+    
+    // Fallback to Alert.alert
+    console.log('📱 Using React Native Alert.alert');
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
@@ -40,19 +60,40 @@ const LogoutButton = () => {
         {
           text: 'Cancel',
           style: 'cancel',
+          onPress: () => console.log('❌ Header sign out cancelled via Alert')
         },
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: signOut,
+          onPress: () => {
+            console.log('✅ Header sign out confirmed via Alert');
+            performSignOut();
+          },
         },
       ]
     );
   };
 
+  const performSignOut = async () => {
+    try {
+      console.log('✅ Header sign out confirmed, calling signOut function...');
+      setSigningOut(true);
+      await signOut();
+      console.log('✅ Header sign out completed successfully');
+    } catch (error) {
+      console.error('❌ Header sign out failed:', error);
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   return (
     <TouchableOpacity
-      onPress={handleLogout}
+      onPress={() => {
+        console.log('🔥 Header button TouchableOpacity pressed!');
+        handleLogout();
+      }}
       style={{
         marginRight: 16,
         paddingHorizontal: 12,
@@ -69,7 +110,7 @@ const LogoutButton = () => {
         fontSize: 14, 
         fontWeight: '600' 
       }}>
-        🚪 Sign Out
+        {signingOut ? '⏳ Signing Out...' : '🚪 Sign Out'}
       </Text>
     </TouchableOpacity>
   );
