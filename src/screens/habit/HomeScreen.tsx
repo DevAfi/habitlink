@@ -137,8 +137,12 @@ const HomeScreen = () => {
     const habitsWithStats = await Promise.all(
       (habitsData || []).map(async (habit) => {
         const todayCompletion = completionsData?.find(c => c.habit_id === habit.id);
-        const completedToday = !!todayCompletion;
         const todayProgress = todayCompletion?.progress_value || 0;
+        
+        // Only mark as completed if progress meets the target (for count/time habits) or if it's a binary habit
+        const completedToday = habit.habit_type === 'binary' 
+          ? !!todayCompletion 
+          : (habit.target_value ? todayProgress >= habit.target_value : !!todayCompletion);
         const streak = await calculateStreak(habit.id);
         
         return {
@@ -207,12 +211,28 @@ const HomeScreen = () => {
       }
     } else {
       // Add completion
+      const habit = habits.find(h => h.id === habitId);
+      let progressValue = null;
+
+      // For count or time habits, auto-fill to target if not already at target
+      if (habit && (habit.habit_type === 'count' || habit.habit_type === 'time') && habit.target_value) {
+        const currentProgress = habit.todayProgress || 0;
+        const target = habit.target_value;
+        
+        // If current progress is less than target, auto-fill to target
+        if (currentProgress < target) {
+          progressValue = target;
+          console.log(`🎯 Auto-filling ${habit.habit_type} habit "${habit.title}" from ${currentProgress} to ${target}`);
+        }
+      }
+
       const { error } = await supabase
         .from('completions')
         .insert({
           habit_id: habitId,
           user_id: user.id,
           completed_at: today,
+          progress_value: progressValue,
         });
 
       if (error) {
@@ -262,20 +282,22 @@ const HomeScreen = () => {
         .eq('habit_id', habitId)
         .eq('completed_at', today);
 
-      // Add new completion with progress value
-      const { error } = await supabase
-        .from('completions')
-        .insert({
-          habit_id: habitId,
-          user_id: user.id,
-          completed_at: today,
-          progress_value: progress,
-        });
+      // Only add completion record if target is met (or it's a binary habit)
+      if (isCompleted) {
+        const { error } = await supabase
+          .from('completions')
+          .insert({
+            habit_id: habitId,
+            user_id: user.id,
+            completed_at: today,
+            progress_value: progress,
+          });
 
-      if (error) {
-        Alert.alert('Error', 'Failed to update progress');
-        console.error('Error updating progress:', error);
-        return;
+        if (error) {
+          Alert.alert('Error', 'Failed to update progress');
+          console.error('Error updating progress:', error);
+          return;
+        }
       }
 
       fetchHabits();
