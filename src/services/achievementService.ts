@@ -99,23 +99,36 @@ export const achievementService = {
     console.log('🎯 Fetching available achievements for:', userId);
     
     try {
-      const { data, error } = await supabase
+      // get all achievements
+      const { data: allAchievements, error: achievementsError } = await supabase
         .from('achievements')
-        .select(`
-          *,
-          user_achievements!left(id)
-        `)
-        .eq('is_active', true)
-        .is('user_achievements.id', null);
+        .select('*')
+        .eq('is_active', true);
 
-      if (error) {
-        console.error('❌ Error fetching available achievements:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
+      if (achievementsError) {
+        console.error('❌ Error fetching all achievements:', achievementsError);
         return [];
       }
 
-      console.log('✅ Found', data?.length || 0, 'available achievements');
-      return data || [];
+      // Then get user's earned achievements
+      const { data: earnedAchievements, error: earnedError } = await supabase
+        .from('user_achievements')
+        .select('achievement_id')
+        .eq('user_id', userId);
+
+      if (earnedError) {
+        console.error('❌ Error fetching earned achievements:', earnedError);
+        return [];
+      }
+
+      // Filter out achievements the user has already earned
+      const earnedIds = new Set(earnedAchievements?.map(ea => ea.achievement_id) || []);
+      const availableAchievements = allAchievements?.filter(achievement => 
+        !earnedIds.has(achievement.id)
+      ) || [];
+
+      console.log('✅ Found', availableAchievements.length, 'available achievements out of', allAchievements?.length || 0, 'total');
+      return availableAchievements;
     } catch (err) {
       console.error('💥 Exception in getAvailableAchievements:', err);
       return [];
